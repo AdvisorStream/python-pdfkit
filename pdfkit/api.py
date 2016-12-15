@@ -5,7 +5,7 @@ from .pdfkit import Configuration
 
 
 def from_url(url, output_path, options=None, toc=None, cover=None,
-             configuration=None, cover_first=False):
+             configuration=None, cover_first=False, **kwargs):
     """
     Convert file of files from URLs to PDF document
 
@@ -21,13 +21,14 @@ def from_url(url, output_path, options=None, toc=None, cover=None,
     """
 
     r = PDFKit(url, 'url', options=options, toc=toc, cover=cover,
-               configuration=configuration, cover_first=cover_first)
+               configuration=configuration, cover_first=cover_first, **kwargs)
 
-    return r.to_pdf(output_path)
+    r.to_pdf(output_path)
+    return r
 
 
 def from_file(input, output_path, options=None, toc=None, cover=None, css=None,
-              configuration=None, cover_first=False):
+              configuration=None, cover_first=False, **kwargs):
     """
     Convert HTML file or files to PDF document
 
@@ -44,13 +45,14 @@ def from_file(input, output_path, options=None, toc=None, cover=None, css=None,
     """
 
     r = PDFKit(input, 'file', options=options, toc=toc, cover=cover, css=css,
-               configuration=configuration, cover_first=cover_first)
+               configuration=configuration, cover_first=cover_first, **kwargs)
 
-    return r.to_pdf(output_path)
+    r.to_pdf(output_path)
+    return r
 
 
 def from_string(input, output_path, options=None, toc=None, cover=None, css=None,
-                configuration=None, cover_first=False):
+                configuration=None, cover_first=False, **kwargs):
     """
     Convert given string or strings to PDF document
 
@@ -67,9 +69,10 @@ def from_string(input, output_path, options=None, toc=None, cover=None, css=None
     """
 
     r = PDFKit(input, 'string', options=options, toc=toc, cover=cover, css=css,
-               configuration=configuration, cover_first=cover_first)
+               configuration=configuration, cover_first=cover_first, **kwargs)
 
-    return r.to_pdf(output_path)
+    r.to_pdf(output_path)
+    return r
 
 
 def configuration(**kwargs):

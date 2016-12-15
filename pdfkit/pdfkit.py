@@ -37,8 +37,9 @@ class PDFKit(object):
             return self.msg
 
     def __init__(self, url_or_file, type_, options=None, toc=None, cover=None,
-                 css=None, configuration=None, cover_first=False):
+                 css=None, configuration=None, cover_first=False, raise_exceptions=True):
 
+        self.raise_exceptions = raise_exceptions
         self.source = Source(url_or_file, type_)
         self.configuration = (Configuration() if configuration is None
                               else configuration)
@@ -55,6 +56,8 @@ class PDFKit(object):
         self.cover_first = cover_first
         self.css = css
         self.stylesheets = []
+        self.stdout = b''
+        self.errors = ''
 
     def _genargs(self, opts):
         """
@@ -146,11 +149,11 @@ class PDFKit(object):
                           'Go to the link above for more information\n'
                           'https://github.com/JazzCore/python-pdfkit/wiki/Using-wkhtmltopdf-without-X-server' % stderr.decode('utf-8'))
 
-        if 'Error' in stderr.decode('utf-8'):
-            raise IOError('wkhtmltopdf reported an error:\n' + stderr.decode('utf-8'))
-
         if exit_code != 0:
-            raise IOError("wkhtmltopdf exited with non-zero code {0}. error:\n{1}".format(exit_code, stderr.decode("utf-8")))
+            if self.raise_exceptions:
+                raise IOError("wkhtmltopdf exited with non-zero code {0}. error:\n{1}".format(exit_code, stderr.decode("utf-8")))
+            else:
+                self.errors += stderr.decode('utf-8')
 
         # Since wkhtmltopdf sends its output to stderr we will capture it
         # and properly send to stdout
@@ -158,7 +161,7 @@ class PDFKit(object):
             sys.stdout.write(stderr.decode('utf-8'))
 
         if not path:
-            return stdout
+            self.stdout = stdout
         else:
             try:
                 with codecs.open(path, encoding='utf-8') as f:
@@ -173,6 +176,13 @@ class PDFKit(object):
                 raise IOError('Command failed: %s\n'
                               'Check whhtmltopdf output without \'quiet\' option' %
                               ' '.join(args))
+
+    @property
+    def result(self):
+        if self.stdout:
+            return self.stdout
+        else:
+            raise ValueError('Result is none')
 
     def _normalize_options(self, options):
         """ Generator of 2-tuples (option-key, option-value).
